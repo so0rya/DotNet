@@ -35,7 +35,7 @@ namespace dotnet_rpg.Services.CharacterService
 
         public async Task<ServiceResponse<List<GetCharacterDto>>> DeleteCharacter(int id)
         {
-             ServiceResponse<List<GetCharacterDto>> response = new ServiceResponse<List<GetCharacterDto>>();
+            ServiceResponse<List<GetCharacterDto>> response = new ServiceResponse<List<GetCharacterDto>>();
             try
             {
                 Character character =characters.First(c=>c.Id == updatedCharacter.Id);
@@ -51,45 +51,23 @@ namespace dotnet_rpg.Services.CharacterService
             return response;
         }
 
-        public Task<ServiceResponse<List<GetCharacterDto>>> GetAllCharacters()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<ServiceResponse<GetCharacterDto>> GetCharacterById(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<ServiceResponse<GetCharacterDto>> UpdateCharacter(UpdateCharacterDto updated)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task UpdateCharacter(object updatedCharacter)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
         public async Task<ServiceResponse<List<GetCharacterDto>>> GetAllCharacters()
         {
-           return new ServiceResponse<List<GetCharacterDto>>{
-           Data= characters.Select(c=>_mapper.Map<GetCharacterDto>(c)).ToList()
-        };
+        return new ServiceResponse<List<GetCharacterDto>>{
+        Data= characters.Select(c=>_mapper.Map<GetCharacterDto>(c)).ToList()};
         }
 
         public async Task<ServiceResponse<GetCharacterDto>> GetCharacterById(int id)
-        {   
+        {
             var serviceResponse = new ServiceResponse<Character>();
             var character= characters.FirstOrDefault(c => c.Id==id);
             serviceResponse.Data=_mapper.Map<GetCharacterDto>(character);
             return serviceResponse;
-         }
+        }
 
         public async Task<ServiceResponse<GetCharacterDto>> UpdateCharacter(UpdateCharacterDto updatedCharacter)
         {
-            ServiceResponse<GetCharacterDto> response = new ServiceResponse<GetCharacterDto>();
+           ServiceResponse<GetCharacterDto> response = new ServiceResponse<GetCharacterDto>();
             try{
             Character character =characters.FirstOrDefault(c=>c.Id == updatedCharacter.Id);
 
@@ -104,13 +82,13 @@ namespace dotnet_rpg.Services.CharacterService
 
             response.Data= _mapper.Map<GetCharacterDto>(character);
             }
-            catch (Exception ex){
+            catch (Exception ex)
+            {
                 response.Success=false;
                 response.Message=ex.Message;
             }
 
             return response;
         }
-
-        
-    }
+    } 
+}
