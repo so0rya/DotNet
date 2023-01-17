@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace 
+namespace dotnet_rpg.Data
 {
-    public class AutoMapperProfile
+    public class DataContext
     {
         
     }
