@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using dotnet_rpg.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace dotnet_rpg.Data
 {
@@ -14,27 +15,53 @@ namespace dotnet_rpg.Data
         {
             _context=context;
         }
-        public Task<ServiceResponse<string>> Login(string Username, string password)
+        public async Task<ServiceResponse<string>> Login(string Username, string password)
         {
-            throw new NotImplementedException();
+            var response = new ServiceResponse<string>();
+            var user= await _context.Users.FirstOrDefaultAsync(u=>u.Username.ToLower().Equals(Username.ToLower()));
+            if (user==null)
+            {
+                response.Success = false;
+                response.Message = "User not found";
+            }
+            else if(!VerifyPasswordHash(password,user.PasswordHash,user.PasswordSalt))
+            {
+                response.Success = false;
+                response.Message = "Wrong Password";
+            }
+            else
+            {
+                response.Data = user.Id.ToString();
+            }
+            return response;
         }
 
         public async Task<ServiceResponse<int>> Register(User user, string password)
         {   
+            ServiceResponse<int> response = new ServiceResponse<int>();
+            if(await UserExists(user.Username))
+            {
+                response.Success=false;
+                response.Message= "User already exists";
+                return response;
+            }
             CreatePasswordHash(password, out byte[] passwordHash, out byte[] passwordSalt);
-            user.PasswordHash= passwordHash;
             user.PasswordSalt = passwordSalt;
+            user.PasswordHash= passwordHash;
+            
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
-            ServiceResponse<int> response = new ServiceResponse<int>();
-            response.Data=user.Id;
+            response.Data=user.Id;  
             return response;
-
         }
 
-        public Task<bool> UserExists(string username)
+        public async Task<bool> UserExists(string username)
         {
-            throw new NotImplementedException();
+            if (await _context.Users.AnyAsync(u=>u.Username.ToLower()==username.ToLower() ))
+            {
+                return true;
+            }
+            return false;
         }
 
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
@@ -43,6 +70,15 @@ namespace dotnet_rpg.Data
             {
                 passwordSalt = hmac.Key;
                 passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            }
+        }
+
+        private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
+        {
+            using (var hmac = new System.Security.Cryptography.HMACSHA512(passwordSalt))
+            {
+                var computeHash=hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                return computeHash.SequenceEqual(passwordHash);
             }
         }
     }
